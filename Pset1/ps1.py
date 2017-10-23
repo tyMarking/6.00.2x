@@ -55,8 +55,30 @@ def greedy_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
-
+    
+    trips = [[]]
+    wLeft = limit
+    currentTrip = []
+    #gets largest Cow
+    cont = True
+    while(cont):
+        currentCow = None
+        for cow in cows:
+            if cows[cow] > cows[currentCow] and cow not in trips and cows[cow] <= wLeft:
+                currentCow = cow
+        if (currentCow == None):
+            if currentTrip == []:
+                cont = False
+                break
+            else:
+                trips.append(currentTrip)
+                wLeft = limit
+                currentTrip = []
+        else:
+            currentTrip.append(currentCow)
+            wLeft -= cows(currentCow)
+    
+    return trips
 
 # Problem 2
 def brute_force_cow_transport(cows,limit=10):
