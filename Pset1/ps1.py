@@ -55,30 +55,36 @@ def greedy_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    
-    trips = [[]]
+    cowList = []
+    for cow in cows:
+        cowList.append(cow)
+    cowList.sort(key=lambda cow: 1/cows[cow])
+    trips = []
     wLeft = limit
     currentTrip = []
-    #gets largest Cow
-    cont = True
-    while(cont):
-        currentCow = None
-        for cow in cows:
-            if cows[cow] > cows[currentCow] and cow not in trips and cows[cow] <= wLeft:
-                currentCow = cow
-        if (currentCow == None):
-            if currentTrip == []:
-                cont = False
-                break
-            else:
+    #main trip loop
+    while (len(cowList) > 0):
+        i = 0
+        noCow = False
+        while (cows[cowList[i]] > wLeft):
+            i += 1
+            if (i >= len(cowList)):
+                #finsih current trip
                 trips.append(currentTrip)
-                wLeft = limit
                 currentTrip = []
-        else:
-            currentTrip.append(currentCow)
-            wLeft -= cows(currentCow)
-    
+                wLeft = limit
+                noCow = True
+                break
+        #now i is largest cow that can fit
+        if (not noCow):
+            currentTrip.append(cowList[i])
+            wLeft -= cows[cowList[i]]
+            del cowList[i]
+
+    if (currentTrip != []):
+        trips.append(currentTrip)
     return trips
+        
 
 # Problem 2
 def brute_force_cow_transport(cows,limit=10):
@@ -102,8 +108,20 @@ def brute_force_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
-
+    best = []
+    for cow in cows:
+        best.append([cow])
+    for part in get_partitions(cows):
+        valid = True
+        for trip in part:
+            sum = 0
+            for cow in trip:
+                sum += cows[cow]
+            if sum > limit:
+                valid = False
+        if (valid and len(part) < len(best)):
+            best = part
+    return best
         
 # Problem 3
 def compare_cow_transport_algorithms():
@@ -120,8 +138,20 @@ def compare_cow_transport_algorithms():
     Does not return anything.
     """
     # TODO: Your code here
-    pass
+    cows = load_cows("ps1_cow_data.txt")
+    limit=10
+    start = time.time()
+    print(greedy_cow_transport(cows, limit))
+    end = time.time()
+    print(end - start)
+    print("for greedy")
+    
 
+    start = time.time()
+    print(brute_force_cow_transport(cows, limit))
+    end = time.time()
+    print(end - start)
+    print("for brute")
 
 """
 Here is some test data for you to see the results of your algorithms with. 
@@ -133,7 +163,10 @@ cows = load_cows("ps1_cow_data.txt")
 limit=100
 print(cows)
 
-print(greedy_cow_transport(cows, limit))
-print(brute_force_cow_transport(cows, limit))
+#print(greedy_cow_transport(cows, limit))
+#print(greedy_cow_transport({'Muscles': 65, 'Polaris': 20, 'Patches': 60, 'Milkshake': 75, 'MooMoo': 85, 'Lotus': 10, 'Clover': 5, 'Louis': 45, 'Horns': 50, 'Miss Bella': 15}, 100))
+#print(greedy_cow_transport({'Daisy': 50, 'Betsy': 65, 'Coco': 10, 'Dottie': 85, 'Lilly': 24, 'Abby': 38, 'Buttercup': 72, 'Rose': 50, 'Patches': 12, 'Willow': 35}, 100))
+#print(brute_force_cow_transport(cows, limit))
+compare_cow_transport_algorithms()
 
 
