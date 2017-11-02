@@ -265,6 +265,7 @@ class StandardRobot(Robot):
 
 
 # === Problem 4
+vis = False
 def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
                   robot_type):
     """
@@ -283,8 +284,11 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     robot_type: class of robot to be instantiated (e.g. StandardRobot or
                 RandomWalkRobot)
     """
+
     totalTime = 0
     for i in range(num_trials):
+        if vis:
+            anim = ps2_visualize.RobotVisualization(num_robots, width, height, 0.03)
         time = 0
         room = RectangularRoom(width, height)
         robots = []
@@ -292,12 +296,16 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
             robots.append(robot_type(room, speed))
         while float(room.getNumCleanedTiles()) / float(room.getNumTiles()) < min_coverage :
             time += 1
+            if vis:
+                anim.update(room, robots)
             for robit in robots:
                 robit.updatePositionAndClean()
-        totalTime += time       
+        totalTime += time      
+        if vis:
+            anim.done()
     return totalTime/num_trials
 # Uncomment this line to see how much your simulation takes on average
-print(runSimulation(3, 1.0, 20, 20, 1, 300, StandardRobot))
+#print(runSimulation(3, .5, 10, 10, 1, 100, StandardRobot))
 
 
 # === Problem 5
@@ -313,8 +321,13 @@ class RandomWalkRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        raise NotImplementedError
+        newPos = self.position.getNewPosition(self.direction, self.speed)
+        if self.room.isPositionInRoom(newPos):
+            self.setRobotPosition(newPos)
+            self.room.cleanTileAtPosition(newPos)
+        self.direction = random.randrange(360)
 
+#print(runSimulation(3, .5, 10, 10, 1, 100, RandomWalkRobot))
 
 def showPlot1(title, x_label, y_label):
     """
@@ -335,6 +348,7 @@ def showPlot1(title, x_label, y_label):
     pylab.ylabel(y_label)
     pylab.show()
 
+#showPlot1("Standard vs Random per # of bots", "# of bots", "time")  
     
 def showPlot2(title, x_label, y_label):
     """
@@ -357,7 +371,7 @@ def showPlot2(title, x_label, y_label):
     pylab.ylabel(y_label)
     pylab.show()
     
-
+showPlot2("time per aspect ratio", "aspect ratio", "time")
 # === Problem 6
 # NOTE: If you are running the simulation, you will have to close it 
 # before the plot will show up.
