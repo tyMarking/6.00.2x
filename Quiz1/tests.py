@@ -45,25 +45,45 @@ def max_sum_rec(L, maxSum, sums):
         return maxSum
     
     nextL = []
-    for i in range(1, len(L)-1):
+    for i in range(1, len(L)):
         nextL.append(L[i])
-    if (nextL not in sums):
-        sums[nextL] = max_sum_rec(nextL, maxSum, sums)
-    if sums[nextL] > maxSum:
-            maxSum = sums[nextL]
+    if (str(nextL) not in sums):
+        sums[str(nextL)] = max_sum_rec(nextL, maxSum, sums)
+    if sums[str(nextL)] > maxSum:
+            maxSum = sums[str(nextL)]
     nextL = []
-    for i in range(len(L)-2):
+    for i in range(len(L)-1):
         nextL.append(L[i])
-    if (nextL not in sums):
-        sums[nextL] = max_sum_rec(nextL, maxSum, sums)
-    if sums[nextL] > maxSum:
-            maxSum = sums[nextL]   
+    if (str(nextL) not in sums):
+        sums[str(nextL)] = max_sum_rec(nextL, maxSum, sums)
+    if sums[str(nextL)] > maxSum:
+            maxSum = sums[str(nextL)]   
     
     
     return maxSum
 
 
-print(max_contig_sum([3,4,-1,5,-4]))
+#print(max_contig_sum([3, 4, -8, 15, -1, 2]))
+    
+def test1(x):
+    return x == -5
+
+def solveit(test):
+    """ test, a function that takes an int parameter and returns a Boolean
+        Assumes there exists an int, x, such that test(x) is True
+        Returns an int, x, with the smallest absolute value such that test(x) is True 
+        In case of ties, return any one of them. 
+    """
+    # IMPLEMENT THIS FUNCTION
+    count = 0
+    while True:
+        if test(count):
+            return count
+            break
+        elif test(-count):
+            return -count
+            break
+        count += 1
     
     
-    
+print(solveit(test1))
