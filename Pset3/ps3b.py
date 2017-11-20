@@ -265,7 +265,7 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
 #
 # PROBLEM 3
 #
-simulationWithoutDrug(100, 1000, 0.1, 0.05, 100)
+#simulationWithoutDrug(100, 1000, 0.1, 0.05, 100)
 class ResistantVirus(SimpleVirus):
     """
     Representation of a virus which can have drug resistance.
@@ -291,8 +291,10 @@ class ResistantVirus(SimpleVirus):
         """
 
         # TODO
-        self.maxBirthProb = maxBirthProb
-        self.clearProb = clearProb
+        SimpleVirus.__init__(self, maxBirthProb, clearProb)
+        
+#        self.maxBirthProb = maxBirthProb
+#        self.clearProb = clearProb
         self.resistances = resistances
         self.mutProb = mutProb
 
@@ -305,6 +307,7 @@ class ResistantVirus(SimpleVirus):
         for key in self.resistances:
             if (self.resistances.get(key)):
                 ret.append(key)
+        return ret
 
     def getMutProb(self):
         """
@@ -376,24 +379,33 @@ class ResistantVirus(SimpleVirus):
         for drug in activeDrugs:
             if not self.resistances[drug]:
                 raise NoChildException
-        if random.random() > self.maxbirthProb * (1-popDensity):
+        if random.random() > self.maxBirthProb * (1-popDensity):
             raise NoChildException
         
         #reproducing!
-        newResistances = resistances.copy()
+        newResistances = self.resistances.copy()
         for key in self.resistances:
-            if random.random() > self.multProb:
-                newResistances[key] = str(not (bool)(resistances.[key]))
+            if random.random() < self.mutProb:
+                #print("HIIIII")
+                newResistances[key] = not(self.resistances[key])
+        
+        #print(newResistances)
                 
-        return ResistantVirus(self.maxBirthProb, self.clearProb, newResistances, self.multProb)
+        return ResistantVirus(self.maxBirthProb, self.clearProb, newResistances, self.mutProb)
             
-
+#virus = ResistantVirus(1.0, 0.0, {'drug1':True}, 0)
+#print(virus.reproduce(0, []).getResistances())
+#print(virus.reproduce(0, []).getResistances())
+#print(virus.reproduce(0, []).getResistances())
+#print(virus.reproduce(0, []).getResistances())
+#print(virus.reproduce(0, []).getResistances())
+#print(virus.getResistances())
 class TreatedPatient(Patient):
     """
     Representation of a patient. The patient is able to take drugs and his/her
     virus population can acquire resistance to the drugs he/she takes.
     """
-
+    drugs = []
     def __init__(self, viruses, maxPop):
         """
         Initialization function, saves the viruses and maxPop parameters as
@@ -405,8 +417,8 @@ class TreatedPatient(Patient):
 
         maxPop: The  maximum virus population for this patient (an integer)
         """
-
-        # TODO
+        Patient.__init__(self, viruses, maxPop)
+        self.drugs = []
 
 
     def addPrescription(self, newDrug):
@@ -420,7 +432,8 @@ class TreatedPatient(Patient):
         postcondition: The list of drugs being administered to a patient is updated
         """
 
-        # TODO
+        if newDrug not in self.drugs:
+            self.drugs.append(newDrug)
 
 
     def getPrescriptions(self):
@@ -431,8 +444,7 @@ class TreatedPatient(Patient):
         patient.
         """
 
-        # TODO
-
+        return self.drugs
 
     def getResistPop(self, drugResist):
         """
@@ -445,9 +457,15 @@ class TreatedPatient(Patient):
         returns: The population of viruses (an integer) with resistances to all
         drugs in the drugResist list.
         """
-
-        # TODO
-
+        ret = []
+        for virus in self.viruses:
+            resist = True
+            for drug in drugResist:
+                if not virus.isResistantTo(drug):
+                   resist = False 
+            if resist:
+                ret.append(virus)
+        return len(ret)
 
     def update(self):
         """
@@ -470,9 +488,51 @@ class TreatedPatient(Patient):
         integer)
         """
 
-        # TODO
+        """
+         - Determine whether each virus particle survives and updates the list
+        of virus particles accordingly. 
+        """
+        toRemove = []
+        for i in range(len(self.viruses)):
+            if self.viruses[i].doesClear():
+                toRemove.insert(0, i)
+        for i in toRemove:
+            del self.viruses[i]
+            
+        """
+        - The current population density is calculated. This population density
+          value is used until the next call to update() 
+        """
+        density = len(self.viruses)/(float)(self.maxPop)
+        
+        """
+         - Based on this value of population density, determine whether each 
+          virus particle should reproduce and add offspring virus particles to 
+          the list of viruses in this patient. 
+        """
 
+        newViruses = []
 
+        for virus in self.viruses:
+            try:
+                newViruses.insert(0, virus.reproduce(density, self.drugs))
+            except NoChildException:
+                continue
+            
+        for virus in newViruses:
+            self.viruses.append(virus)
+            
+        return len(self.viruses)
+
+#
+#virus1 = ResistantVirus(1.0, 0.0, {"drug1": True}, 0.0)
+#virus2 = ResistantVirus(1.0, 0.0, {"drug1": False}, 0.0)
+#patient = TreatedPatient([virus1, virus2], 1000000)
+#patient.addPrescription("drug1")
+#for i in range(5):
+#    patient.update()
+#print(patient.getTotalPop())
+#print(patient.getResistPop(["drug1"]))
 
 #
 # PROBLEM 4
@@ -500,4 +560,65 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     
     """
 
-    # TODO
+    viruses = []
+    for i in range(numViruses):
+        viruses.append(ResistantVirus(maxBirthProb, clearProb, resistances, mutProb))
+    #patient = Patient(viruses, maxPop)
+    #pops = [[]]*300
+    pops = []
+    resPops = []
+    for i in range(450):
+        pops.append([])
+        resPops.append([])
+    #print(pops)
+    
+    
+#    
+#    patients = []
+#    for i in range(numTrials):
+#        patients.append(Patient(viruses))
+#    
+    
+    for i in range(numTrials):
+        patient = TreatedPatient(list(viruses), maxPop)
+        for t in range(150):
+            patient.update()
+            
+            pops[t].append(patient.getTotalPop())
+            resPops[t].append(patient.getResistPop(["guttagonol"]))
+        patient.addPrescription("guttagonol")
+        for t in range(300):
+            patient.update()
+            
+            pops[t+150].append(patient.getTotalPop())
+            resPops[t+150].append(patient.getResistPop(["guttagonol"]))
+            
+    #print(patient.getResistPop("guttagonol"))
+    # now have list of list of pop with pindex of t
+    #print(pops)
+    avgPops = []
+    for pop in pops:
+        avgPops.append((float)(sum(pop))/(float)(len(pop)))
+    avgResPops = []
+    for resPop in resPops:
+        avgResPops.append((float)(sum(resPop))/(float)(len(resPop)))
+    #print(resPops)
+    #print(avgResPops)
+    #print(avgPops)  
+    avgNonResPops = []
+    for i in range(len(avgPops)):
+        avgNonResPops.append(avgPops[i]-avgResPops[i])
+    
+    
+    pylab.figure("1")
+    #pylab.clf()
+    pylab.title("ResistantVirus simulation")
+    pylab.xlabel("Time Steps")
+    pylab.ylabel("Average Virus Population")
+    #pylab.ylim(0,maxPop)
+    pylab.plot(range(450),avgPops, label="Total Population")
+    pylab.plot(range(450),avgResPops, label="Resistant Population")
+    pylab.plot(range(450),avgNonResPops, label="Non-Resistant Population")
+    pylab.legend()
+    pylab.show()
+simulationWithDrug(100, 1000, 0.1, 0.05, {"guttagonol": False}, 0.5, 100)
