@@ -567,7 +567,7 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     #pops = [[]]*300
     pops = []
     resPops = []
-    for i in range(450):
+    for i in range(300):
         pops.append([])
         resPops.append([])
     #print(pops)
@@ -587,7 +587,7 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
             pops[t].append(patient.getTotalPop())
             resPops[t].append(patient.getResistPop(["guttagonol"]))
         patient.addPrescription("guttagonol")
-        for t in range(300):
+        for t in range(150):
             patient.update()
             
             pops[t+150].append(patient.getTotalPop())
@@ -616,9 +616,9 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     pylab.xlabel("Time Steps")
     pylab.ylabel("Average Virus Population")
     #pylab.ylim(0,maxPop)
-    pylab.plot(range(450),avgPops, label="Total Population")
-    pylab.plot(range(450),avgResPops, label="Resistant Population")
-    pylab.plot(range(450),avgNonResPops, label="Non-Resistant Population")
+    pylab.plot(range(300),avgPops, label="Total Population")
+    pylab.plot(range(300),avgResPops, label="Resistant Population")
+    #pylab.plot(range(300),avgNonResPops, label="Non-Resistant Population")
     pylab.legend()
     pylab.show()
-simulationWithDrug(100, 1000, 0.1, 0.05, {"guttagonol": False}, 0.5, 100)
+simulationWithDrug(100, 1000, 0.1, 0.05, {"guttagonol": False}, 0.005, 100)
